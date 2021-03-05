@@ -72,7 +72,7 @@ public:
 
     bool decode_header()
     {
-        std::memcpy(data(), &m_header, header_length);
+        std::memcpy(&m_header, data(), header_length);
         if (m_header.bodySize > max_body_length)
         {
             std::cout << "body size " << m_header.bodySize << " " << m_header.type << std::endl;
