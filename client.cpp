@@ -28,6 +28,7 @@ public:
         //去io_context注册一个事件,完成后回调
         boost::asio::post(io_context_,
                           [this, msg]() {
+                              //write_msgs_开始为空返回true
                               bool write_in_progress = !write_msgs_.empty();
                               write_msgs_.push_back(msg);
                               if (!write_in_progress)
@@ -77,9 +78,19 @@ private:
                                 [this](boost::system::error_code ec, std::size_t /*length*/) {
                                     if (!ec)
                                     {
-                                        //输出到标准输出上
-                                        std::cout.write(read_msg_.body(), read_msg_.body_length());
-                                        std::cout << "\n";
+                                        if (read_msg_.body_length() == sizeof(RoomInfomation) &&
+                                            read_msg_.type() == MT_ROOM_INFO)
+                                        {
+                                            const RoomInfomation *info = reinterpret_cast<const RoomInfomation *>(read_msg_.body());
+
+                                            std::cout << "client: '";
+                                            assert(info->name.nameLen <= sizeof(info->name.name));
+                                            std::cout.write(info->name.name, info->name.nameLen);
+                                            std::cout << "' says '";
+                                            assert(info->chat.infoLen <= sizeof(info->chat.information));
+                                            std::cout.write(info->chat.information, info->chat.infoLen);
+                                            std::cout << "'\n'";
+                                        }
                                         do_read_header();
                                     }
                                     else
@@ -146,7 +157,7 @@ int main(int argc, char *argv[])
             {
                 msg.setMessage(type, output.data(), output.size());
                 c.write(msg);
-                std::cout << "write message for server" << output.size() << std::endl;
+                std::cout << "write message for server " << output.size() << std::endl;
             }
         }
 

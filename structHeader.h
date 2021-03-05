@@ -9,6 +9,13 @@ struct Header
     int type;
 };
 
+enum MessageType
+{
+    MT_BIND_NAME = 1,
+    MT_CHAT_INFO = 2,
+    MT_ROOM_INFO = 3,
+};
+
 struct BindName
 {
     char name[32];

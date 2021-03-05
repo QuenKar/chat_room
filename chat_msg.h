@@ -103,7 +103,7 @@ bool parseMessage(const std::string &input, int *type, std::string &outbuffer)
         if (name.size() > 32)
             return false;
         if (type)
-            *type = 1;
+            *type = MT_BIND_NAME;
         BindName bindInfo;
         bindInfo.nameLen = name.size();
         std::memcpy(&(bindInfo.name), name.data(), name.size());
@@ -122,7 +122,7 @@ bool parseMessage(const std::string &input, int *type, std::string &outbuffer)
         auto buffer = reinterpret_cast<const char *>(&info);
         outbuffer.assign(buffer, buffer + sizeof(info));
         if (type)
-            *type = 2;
+            *type = MT_CHAT_INFO;
         return true;
     }
     return false;

@@ -89,7 +89,8 @@ private:
                                 [this, self](boost::system::error_code ec, std::size_t /*length*/) {
                                     if (!ec)
                                     {
-                                        room_.deliver(read_msg_);
+                                        // room_.deliver(read_msg_);
+                                        handleMessage();
                                         do_read_header();
                                     }
                                     else
@@ -97,6 +98,27 @@ private:
                                         room_.leave(shared_from_this());
                                     }
                                 });
+    }
+
+    void handleMessage()
+    {
+        if (read_msg_.type() == MT_BIND_NAME)
+        {
+            const BindName *bind = reinterpret_cast<const BindName *>(read_msg_.body());
+            m_name.assign(bind->name, bind->name + bind->nameLen);
+        }
+        else if (read_msg_.type() == MT_CHAT_INFO)
+        {
+            const ChatInfomation *chat = reinterpret_cast<const ChatInfomation *>(read_msg_.body());
+            m_chatInfomation.assign(chat->information, chat->information + chat->infoLen);
+            auto rinfo = buildRoomInfo();
+            chat_message msg;
+            msg.setMessage(MT_ROOM_INFO, &rinfo, sizeof(rinfo));
+            room_.deliver(msg);
+        }
+        else
+        {
+        }
     }
 
     void do_write()
@@ -121,10 +143,24 @@ private:
                                  });
     }
 
+    RoomInfomation buildRoomInfo() const
+    {
+        RoomInfomation info;
+        info.name.nameLen = m_name.size();
+        std::memcpy(info.name.name, m_name.data(), m_name.size());
+        info.chat.infoLen = m_chatInfomation.size();
+        std::memcpy(info.chat.information, m_chatInfomation.data(),
+                    m_chatInfomation.size());
+        return info;
+    }
+
     tcp::socket socket_;
     chat_room &room_;
     chat_message read_msg_;
     chat_message_queue write_msgs_;
+
+    std::string m_name;
+    std::string m_chatInfomation;
 };
 
 //----------------------------------------------------------------------
