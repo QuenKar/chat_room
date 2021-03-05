@@ -139,10 +139,15 @@ int main(int argc, char *argv[])
         while (std::cin.getline(line, chat_message::max_body_length + 1))
         {
             chat_message msg;
-            msg.body_length(std::strlen(line));
-            std::memcpy(msg.body(), line, msg.body_length());
-            msg.encode_header();
-            c.write(msg);
+            int type = 0;
+            std::string input(line, line + std::strlen(line));
+            std::string output;
+            if (parseMessage(input, &type, output))
+            {
+                msg.setMessage(type, output.data(), output.size());
+                c.write(msg);
+                std::cout << "write message for server" << output.size() << std::endl;
+            }
         }
 
         c.close();

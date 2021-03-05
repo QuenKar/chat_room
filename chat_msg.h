@@ -1,9 +1,14 @@
 #ifndef CHAT_MSG_H
 #define CHAT_MSG_H
 
+#include "structHeader.h"
+
+#include <iostream>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 
 //message { header, body }
 
@@ -12,17 +17,14 @@ class chat_message
 public:
     enum
     {
-        header_length = 4
+        header_length = sizeof(Header)
     };
     enum
     {
         max_body_length = 512
     };
 
-    chat_message()
-        : body_length_(0)
-    {
-    }
+    chat_message() {}
 
     const char *data() const
     {
@@ -36,7 +38,7 @@ public:
 
     std::size_t length() const
     {
-        return header_length + body_length_;
+        return header_length + m_header.bodySize;
     }
 
     const char *body() const
@@ -49,41 +51,82 @@ public:
         return data_ + header_length;
     }
 
-    std::size_t body_length() const
+    int type() const
     {
-        return body_length_;
+        return m_header.type;
     }
 
-    void body_length(std::size_t new_length)
+    std::size_t body_length() const
     {
-        body_length_ = new_length;
-        if (body_length_ > max_body_length)
-            body_length_ = max_body_length;
+        return m_header.bodySize;
+    }
+
+    void setMessage(int messageType, const void *buffer, size_t bufferSize)
+    {
+        assert(bufferSize <= max_body_length);
+        m_header.bodySize = bufferSize;
+        m_header.type = messageType;
+        std::memcpy(body(), buffer, bufferSize);
+        std::memcpy(data(), &m_header, sizeof(m_header));
     }
 
     bool decode_header()
     {
-        char header[header_length + 1] = "";
-        std::strncat(header, data_, header_length);
-        body_length_ = std::atoi(header);
-        if (body_length_ > max_body_length)
+        std::memcpy(data(), &m_header, header_length);
+        if (m_header.bodySize > max_body_length)
         {
-            body_length_ = 0;
+            std::cout << "body size " << m_header.bodySize << " " << m_header.type << std::endl;
             return false;
         }
         return true;
     }
 
-    void encode_header()
-    {
-        char header[header_length + 1] = "";
-        std::sprintf(header, "%4d", static_cast<int>(body_length_));
-        std::memcpy(data_, header, header_length);
-    }
-
 private:
     char data_[header_length + max_body_length];
-    std::size_t body_length_;
+    Header m_header;
 };
+
+//parse message
+bool parseMessage(const std::string &input, int *type, std::string &outbuffer)
+{
+    auto pos = input.find_first_of(" ");
+    if (pos == std::string::npos)
+        return false;
+
+    if (pos == 0)
+        return false;
+    auto command = input.substr(0, pos);
+
+    if (command == "BindName")
+    {
+        std::string name = input.substr(pos + 1);
+        if (name.size() > 32)
+            return false;
+        if (type)
+            *type = 1;
+        BindName bindInfo;
+        bindInfo.nameLen = name.size();
+        std::memcpy(&(bindInfo.name), name.data(), name.size());
+        auto buffer = reinterpret_cast<const char *>(&bindInfo);
+        outbuffer.assign(buffer, buffer + sizeof(bindInfo));
+        return true;
+    }
+    else if (command == "Chat")
+    {
+        std::string chat = input.substr(pos + 1);
+        if (chat.size() > 256)
+            return false;
+        ChatInfomation info;
+        info.infoLen = chat.size();
+        std::memcpy(&(info.information), chat.data(), chat.size());
+        auto buffer = reinterpret_cast<const char *>(&info);
+        outbuffer.assign(buffer, buffer + sizeof(info));
+        if (type)
+            *type = 2;
+        return true;
+    }
+    return false;
+}
+//--------------------------------------------------------------------
 
 #endif
