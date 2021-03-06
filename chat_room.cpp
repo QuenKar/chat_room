@@ -1,4 +1,5 @@
 #include "chat_msg.h"
+#include "JsonObject.h"
 
 #include <boost/asio.hpp>
 
@@ -100,20 +101,31 @@ private:
                                 });
     }
 
+    ptree toPtree()
+    {
+        ptree obj;
+        std::stringstream ss(
+            std::string(read_msg_.body(),
+                        read_msg_.body() + read_msg_.body_length()));
+        boost::property_tree::read_json(ss, obj);
+        return obj;
+    }
+
     void handleMessage()
     {
         if (read_msg_.type() == MT_BIND_NAME)
         {
-            const BindName *bind = reinterpret_cast<const BindName *>(read_msg_.body());
-            m_name.assign(bind->name, bind->name + bind->nameLen);
+            auto nameTree = toPtree();
+            m_name = nameTree.get<std::string>("name");
         }
         else if (read_msg_.type() == MT_CHAT_INFO)
         {
-            const ChatInfomation *chat = reinterpret_cast<const ChatInfomation *>(read_msg_.body());
-            m_chatInfomation.assign(chat->information, chat->information + chat->infoLen);
+            auto chat = toPtree();
+            m_chatInfomation = chat.get<std::string>("information");
+
             auto rinfo = buildRoomInfo();
             chat_message msg;
-            msg.setMessage(MT_ROOM_INFO, &rinfo, sizeof(rinfo));
+            msg.setMessage(MT_ROOM_INFO, rinfo);
             room_.deliver(msg);
         }
         else
@@ -143,19 +155,17 @@ private:
                                  });
     }
 
-    RoomInfomation buildRoomInfo() const
+    std::string buildRoomInfo() const
     {
-        RoomInfomation info;
-        info.name.nameLen = m_name.size();
-        std::memcpy(info.name.name, m_name.data(), m_name.size());
-        info.chat.infoLen = m_chatInfomation.size();
-        std::memcpy(info.chat.information, m_chatInfomation.data(),
-                    m_chatInfomation.size());
-        return info;
+        ptree tree;
+        tree.put("name", m_name);
+        tree.put("information", m_chatInfomation);
+        return ptreeToJsonString(tree);
     }
 
     tcp::socket socket_;
     chat_room &room_;
+
     chat_message read_msg_;
     chat_message_queue write_msgs_;
 
@@ -188,7 +198,6 @@ private:
                 do_accept();
             });
     }
-    // tcp::socket socket_;
     tcp::acceptor acceptor_;
     chat_room room_;
 };
