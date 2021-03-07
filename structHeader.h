@@ -34,6 +34,7 @@ struct RoomInfomation
     ChatInfomation chat;
 };
 
-bool parseMessage2(const std::string &input, int *type, std::string &outbuffer);
+// bool parseMessage2(const std::string &input, int *type, std::string &outbuffer);
+bool parseMessage4(const std::string &input, int *type, std::string &outbuffer);
 
 #endif

@@ -1,5 +1,6 @@
 #include "chat_msg.h"
 #include "JsonObject.h"
+#include "Protocol.pb.h"
 
 #include <boost/asio.hpp>
 
@@ -81,19 +82,23 @@ private:
                                     {
                                         if (read_msg_.type() == MT_ROOM_INFO)
                                         {
-                                            // const RoomInfomation *info = reinterpret_cast<const RoomInfomation *>(read_msg_.body());
-                                            std::stringstream ss(std::string(
-                                                read_msg_.body(), read_msg_.body() + read_msg_.body_length()));
-
-                                            //使用json进行消息传递
-                                            ptree tree;
-                                            boost::property_tree::read_json(ss, tree);
+                                            std::string buffer(read_msg_.body(),
+                                                               read_msg_.body() + read_msg_.body_length());
+                                            PRoomInformation roomInfo;
+                                            auto ok = roomInfo.ParseFromString(buffer);
                                             //显示服务器给各客户端返回的info
-                                            std::cout << "client: '";
-                                            std::cout << tree.get<std::string>("name");
-                                            std::cout << "' says '";
-                                            std::cout << tree.get<std::string>("information");
-                                            std::cout << "'\n'";
+                                            if (ok)
+                                            {
+                                                std::cout << "client: '";
+                                                std::cout << roomInfo.name();
+                                                std::cout << "' says '";
+                                                std::cout << roomInfo.information();
+                                                std::cout << "'\n'";
+                                            }
+                                            else
+                                            {
+                                                /* 处理出错情况 */
+                                            }
                                         }
                                         do_read_header();
                                     }
@@ -136,6 +141,9 @@ int main(int argc, char *argv[])
 {
     try
     {
+        //处理版本兼容性
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
+
         if (argc != 3)
         {
             std::cerr << "Usage: chat_client <host> <port>\n";
@@ -157,7 +165,7 @@ int main(int argc, char *argv[])
             int type = 0;
             std::string input(line, line + std::strlen(line));
             std::string output;
-            if (parseMessage2(input, &type, output))
+            if (parseMessage4(input, &type, output))
             {
                 msg.setMessage(type, output.data(), output.size());
                 c.write(msg);
@@ -172,6 +180,7 @@ int main(int argc, char *argv[])
     {
         std::cerr << "Exception: " << e.what() << "\n";
     }
-
+    //防止检查内存泄漏的软件误操作
+    google::protobuf::ShutdownProtobufLibrary();
     return 0;
 }

@@ -1,5 +1,5 @@
-server: chat_room.cpp structHeader.cpp
-	g++ chat_room.cpp structHeader.cpp -o bin/chat_room -lpthread
+server: chat_room.cpp structHeader.cpp Protocol.pb.cc
+	g++ chat_room.cpp structHeader.cpp Protocol.pb.cc -o bin/chat_room -lpthread -lprotobuf
 	
-client: client.cpp structHeader.cpp
-	g++ client.cpp structHeader.cpp -o bin/client -lpthread
+client: client.cpp structHeader.cpp Protocol.pb.cc
+	g++ client.cpp structHeader.cpp Protocol.pb.cc -o bin/client -lpthread -lprotobuf

@@ -1,5 +1,6 @@
 #include "chat_msg.h"
 #include "JsonObject.h"
+#include "Protocol.pb.h"
 
 #include <boost/asio.hpp>
 
@@ -101,27 +102,26 @@ private:
                                 });
     }
 
-    ptree toPtree()
+    bool fillProtobuf(::google::protobuf::Message *msg)
     {
-        ptree obj;
-        std::stringstream ss(
-            std::string(read_msg_.body(),
-                        read_msg_.body() + read_msg_.body_length()));
-        boost::property_tree::read_json(ss, obj);
-        return obj;
+        std::string str(read_msg_.body(), read_msg_.body() + read_msg_.body_length());
+        return msg->ParseFromString(str);
     }
 
     void handleMessage()
     {
         if (read_msg_.type() == MT_BIND_NAME)
         {
-            auto nameTree = toPtree();
-            m_name = nameTree.get<std::string>("name");
+            PBindName bindname;
+            if (fillProtobuf(&bindname))
+                m_name = bindname.name();
         }
         else if (read_msg_.type() == MT_CHAT_INFO)
         {
-            auto chat = toPtree();
-            m_chatInfomation = chat.get<std::string>("information");
+            PChat pchat;
+            if (!fillProtobuf(&pchat))
+                return;
+            m_chatInfomation = pchat.information();
 
             auto rinfo = buildRoomInfo();
             chat_message msg;
@@ -157,10 +157,12 @@ private:
 
     std::string buildRoomInfo() const
     {
-        ptree tree;
-        tree.put("name", m_name);
-        tree.put("information", m_chatInfomation);
-        return ptreeToJsonString(tree);
+        PRoomInformation roomInfo;
+        roomInfo.set_name(m_name);
+        roomInfo.set_information(m_chatInfomation);
+        std::string out;
+        roomInfo.SerializeToString(&out);
+        return out;
     }
 
     tcp::socket socket_;
@@ -232,6 +234,7 @@ int main(int argc, char *argv[])
 {
     try
     {
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
         if (argc < 2)
         {
             std::cerr << "Usage: chat_server <port> [<port> ...]\n";
@@ -253,6 +256,6 @@ int main(int argc, char *argv[])
     {
         std::cerr << "Exception: " << e.what() << "\n";
     }
-
+    google::protobuf::ShutdownProtobufLibrary();
     return 0;
 }
