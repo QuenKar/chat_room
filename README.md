@@ -2,7 +2,7 @@
 
 ### 项目简介
 
-使用boost : : asio实现异步网络通信，I/O模型也采用了proactor模式，服务器和客户端之间传递的消息格式采用Google的protocol buffer来定义，protocol buffer也比较高效，没有采用json格式因为考虑到json的无效字符比较较多，但是json的好处是通用和易懂。
+使用boost : : asio实现异步网络通信，I/O模型也采用了proactor模式，服务器和客户端之间传递的消息格式采用Google的protocol buffer来定义，protocol buffer也比较高效，没有采用json格式因为考虑到json的无效字符比较多，但是json的好处是通用和易懂。
 
 ### 项目结构
 
@@ -40,4 +40,5 @@
 绑定姓名使用bindname，发送消息使用chat，例如：
 
 `bindname zww`
+
 `chat hello`
