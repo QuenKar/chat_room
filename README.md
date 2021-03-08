@@ -2,11 +2,9 @@
 
 ### 项目简介
 
-这个项目大致框架是从
+这个项目大致框架是从boost : : asio官方教程中提取出来的，并对其进行了一些改进。
 
-[boost]: https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio/example/cpp11/chat/chat_server.cpp	"boost : : asio"
-
-官方教程中提取出来的，并对其进行了一些改进。
+https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio/example/cpp11/chat/chat_server.cpp
 
 使用boost : : asio实现异步网络通信，I/O模型也采用了proactor模式，服务器和客户端之间传递的消息格式采用Google的protocol buffer来定义，protocol buffer也比较高效，没有采用json格式因为考虑到json的无效字符比较多，但是json的好处是通用和易懂。
 
@@ -41,6 +39,7 @@
 `./bin/chat_room <port>`
 
 启动客户端
+
 `./bin/client localhost <port>`
 
 绑定姓名使用bindname，发送消息使用chat，例如：
