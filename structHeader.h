@@ -16,25 +16,7 @@ enum MessageType
     MT_ROOM_INFO = 3,
 };
 
-struct BindName
-{
-    char name[32];
-    int nameLen;
-};
 
-struct ChatInfomation
-{
-    char information[256];
-    int infoLen;
-};
-
-struct RoomInfomation
-{
-    BindName name;
-    ChatInfomation chat;
-};
-
-// bool parseMessage2(const std::string &input, int *type, std::string &outbuffer);
-bool parseMessage4(const std::string &input, int *type, std::string &outbuffer);
+bool parseMessage(const std::string &input, int *type, std::string &outbuffer);
 
 #endif

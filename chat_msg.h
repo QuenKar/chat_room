@@ -2,7 +2,6 @@
 #define CHAT_MSG_H
 
 #include "structHeader.h"
-#include "JsonObject.h"
 
 #include <iostream>
 
@@ -88,8 +87,8 @@ public:
     }
 
 private:
-    char data_[header_length + max_body_length];
     Header m_header;
+    char data_[header_length + max_body_length];
 };
 
 //--------------------------------------------------------------------

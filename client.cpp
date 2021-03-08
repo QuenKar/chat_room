@@ -1,5 +1,4 @@
 #include "chat_msg.h"
-#include "JsonObject.h"
 #include "Protocol.pb.h"
 
 #include <boost/asio.hpp>
@@ -165,7 +164,7 @@ int main(int argc, char *argv[])
             int type = 0;
             std::string input(line, line + std::strlen(line));
             std::string output;
-            if (parseMessage4(input, &type, output))
+            if (parseMessage(input, &type, output))
             {
                 msg.setMessage(type, output.data(), output.size());
                 c.write(msg);

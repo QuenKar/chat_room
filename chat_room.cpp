@@ -1,5 +1,4 @@
 #include "chat_msg.h"
-#include "JsonObject.h"
 #include "Protocol.pb.h"
 
 #include <boost/asio.hpp>
@@ -21,7 +20,9 @@ using chat_message_queue = std::deque<chat_message>;
 //----------------------------------------------------------------------
 //chat_room
 class chat_session;
+
 using chat_session_ptr = std::shared_ptr<chat_session>;
+
 class chat_room
 {
 public:
@@ -91,7 +92,6 @@ private:
                                 [this, self](boost::system::error_code ec, std::size_t /*length*/) {
                                     if (!ec)
                                     {
-                                        // room_.deliver(read_msg_);
                                         handleMessage();
                                         do_read_header();
                                     }

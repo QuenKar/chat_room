@@ -1,14 +1,17 @@
-syntax='proto3';
+syntax = 'proto3';
+
 message PBindName
 {
-    string name=1;
+    string name = 1;
 }
+
 message PChat
 {
-    string information=1;
+    string information = 1;
 }
+
 message PRoomInformation
 {
-    string name=1;
-    string information=2;
+    string name = 1;
+    string information = 2;
 }
