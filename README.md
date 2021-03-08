@@ -1,4 +1,4 @@
-## Chat Room implements by c++
+## Chat Room
 
 ### 项目简介
 
