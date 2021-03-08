@@ -148,6 +148,9 @@ int main(int argc, char *argv[])
             std::cerr << "Usage: chat_client <host> <port>\n";
             return 1;
         }
+        
+        std::cout<<"bindname <your name>\n";
+        std::cout<<"chat <your message>\n";
 
         boost::asio::io_context io_context;
 
