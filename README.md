@@ -30,6 +30,31 @@ https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio/example/cpp11/chat/cha
 
 ### 运行
 
+远程访问：
+
+在linux下
+需要安装protocol buffer
+`sudo apt install protobuf-compiler`
+`cd bin`
+`./client 121.5.75.28 8888`
+
+eg.
+```bash
+$ ./client 121.5.75.28 8888
+bindname <your name>
+chat <your message>
+client: '' says 'hello'
+'client: '' says 'hi'
+'client: '' says 'hi'
+'client: '' says 'lalallala'
+'client: 'zww' says 'ni hao '
+bindname zhr
+'write message for server 5
+chat welcome to chat room!
+write message for server 23
+client: 'zhr' says 'welcome to chat room!'
+```
+
 本地测试：
 
 `git clone https://github.com/QuenKar/chat_room.git`
