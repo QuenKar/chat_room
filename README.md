@@ -32,10 +32,12 @@ https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio/example/cpp11/chat/cha
 
 远程访问：
 
-在linux下
-需要安装protocol buffer
+在linux下需要安装protocol buffer
+
 `sudo apt install protobuf-compiler`
+
 `cd bin`
+
 `./client 121.5.75.28 8888`
 
 eg.
